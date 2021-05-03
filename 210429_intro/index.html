@@ -10,42 +10,60 @@
 
 <body>
 
-  <input type="url" name="url" id="url" value="123">
-  <input type="submit" value="go" id="go">
+  <input type="url" name="url" id="url" placeholder="請輸入有效網址">
+  <input type="submit" value="確認修改" id="renew">
   <p id="newUrl"></p>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <!-- <script src="./data.json"></script> -->
   <script>
     var form = new FormData();
-    // 送出
-    $("#go").click(function () {
+    var url = "";
+
+    // ajax.get function
+    function getUrl() {
+      $.get('./data.json')
+        .then(function (res) {
+          console.log(`目前連結：${res.url}`);
+          $("#newUrl").text(`目前連結：${res.url}`)
+          url = res.url;
+        }, function (error) {
+          console.log(error.status);
+          console.log(error.responseText);
+        })
+    }
+
+    // 進網頁預覽
+    getUrl()
+
+
+    // 確認修改
+    $("#renew").click(function () {
       form.append("url", $("#url").val());
 
-      var settings = {
+      var changeURL = {
         "url": "http://127.0.0.1:5500/getData.php",
         "method": "POST",
         "timeout": 0,
         "processData": false,
         "mimeType": "multipart/form-data",
         "contentType": false,
-        "data": form
+        "data": form,
+        "success": function (res) {
+          // 預覽網址
+          url = $("#url").val();
+          $("#newUrl").text(`新連結：${url}`);
+          console.log("成功傳送");
+          console.log(`新連結：${url}`);
+        },
+        "erroe": function (error) {
+          console.log(error.status);
+        }
       };
 
-      $.ajax(settings).done(function (response) {
-        console.log(response);
-      });
+      // 傳送至 php檔，使修改 JSON 檔
+      $.ajax(changeURL);
     });
-
-    // TODO 接收 ajax get! 資料
-    $("#newUrl")
-    $.get('./data.json')
-      .then(function (response) {
-        console.log(response.url);
-      }, function (error) {
-        console.log(error.status);
-        console.log(error.responseText);
-      })
 
   </script>
 </body>
